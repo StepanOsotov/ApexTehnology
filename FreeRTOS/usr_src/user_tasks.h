@@ -51,8 +51,8 @@ typedef struct
 extern usart_usr_t usart3_usr;
 extern usart_usr_t usart2_usr;
 
-extern SemaphoreHandle_t xBinSemaph3to2;
-extern SemaphoreHandle_t xBinSemaph2to3;
+extern SemaphoreHandle_t xBinSemaph3;
+extern SemaphoreHandle_t xBinSemaph2;
 
 //--------------------------------------------------------------------------------
 

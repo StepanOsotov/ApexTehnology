@@ -91,8 +91,8 @@ int main(void)
 	
 	//----------------------------------------
 	
-	vSemaphoreCreateBinary(xBinSemaph3to2);
-	vSemaphoreCreateBinary(xBinSemaph2to3);
+	vSemaphoreCreateBinary(xBinSemaph3);
+	vSemaphoreCreateBinary(xBinSemaph2);
 	
 	xTaskCreate(vTaskLedToggle, (const char *)"ToggleLeds",
 							configMINIMAL_STACK_SIZE, NULL,

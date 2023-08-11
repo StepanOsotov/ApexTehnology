@@ -985,7 +985,7 @@ I (.\usr_libs\Drivers\inc\stm32l1xx_wwdg.h)(0x553521AE)
 I (.\usr_libs\Drivers\inc\misc.h)(0x64C20327)
 I (usr_src\usart2_usr.h)(0x64D5DEF8)
 I (usr_src\usart3_usr.h)(0x64D5DEF7)
-I (usr_src\user_tasks.h)(0x64D5FE93)
+I (usr_src\user_tasks.h)(0x64D60392)
 I (usr_src\init_periph.h)(0x64181687)
 F (.\usr_src\init_periph.c)(0x64D414A4)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\init_periph.o --omf_browse .\objects\init_periph.crf --depend .\objects\init_periph.d)
 I (usr_src\init_periph.h)(0x64181687)
@@ -1045,8 +1045,8 @@ I (.\usr_libs\Drivers\inc\misc.h)(0x64C20327)
 I (usr_src\usart2_usr.h)(0x64D5DEF8)
 I (usr_src\usart3_usr.h)(0x64D5DEF7)
 I (usr_src\delay_us.h)(0x641AE1A4)
-I (usr_src\user_tasks.h)(0x64D5FE93)
-F (.\usr_src\main.c)(0x64D5FE93)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+I (usr_src\user_tasks.h)(0x64D60392)
+F (.\usr_src\main.c)(0x64D60392)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (usr_src\main.h)(0x64D5C12B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x602569C4)
@@ -1103,10 +1103,10 @@ I (.\usr_libs\Drivers\inc\misc.h)(0x64C20327)
 I (usr_src\usart2_usr.h)(0x64D5DEF8)
 I (usr_src\usart3_usr.h)(0x64D5DEF7)
 I (usr_src\delay_us.h)(0x641AE1A4)
-I (usr_src\user_tasks.h)(0x64D5FE93)
+I (usr_src\user_tasks.h)(0x64D60392)
 I (usr_src\init_periph.h)(0x64181687)
-F (.\usr_src\user_tasks.c)(0x64D5FE93)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\user_tasks.o --omf_browse .\objects\user_tasks.crf --depend .\objects\user_tasks.d)
-I (usr_src\user_tasks.h)(0x64D5FE93)
+F (.\usr_src\user_tasks.c)(0x64D60422)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\user_tasks.o --omf_browse .\objects\user_tasks.crf --depend .\objects\user_tasks.d)
+I (usr_src\user_tasks.h)(0x64D60392)
 I (usr_src\main.h)(0x64D5C12B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x602569C4)
@@ -1221,7 +1221,7 @@ I (.\usr_libs\Drivers\inc\stm32l1xx_wwdg.h)(0x553521AE)
 I (.\usr_libs\Drivers\inc\misc.h)(0x64C20327)
 I (usr_src\usart2_usr.h)(0x64D5DEF8)
 I (usr_src\init_periph.h)(0x64181687)
-I (usr_src\user_tasks.h)(0x64D5FE93)
+I (usr_src\user_tasks.h)(0x64D60392)
 I (usr_src\delay_us.h)(0x641AE1A4)
 F (.\usr_src\usart2_usr.c)(0x64D5FE93)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\usart2_usr.o --omf_browse .\objects\usart2_usr.crf --depend .\objects\usart2_usr.d)
 I (usr_src\usart2_usr.h)(0x64D5DEF8)
@@ -1280,7 +1280,7 @@ I (.\usr_libs\Drivers\inc\stm32l1xx_usart.h)(0x553521AE)
 I (.\usr_libs\Drivers\inc\stm32l1xx_wwdg.h)(0x553521AE)
 I (.\usr_libs\Drivers\inc\misc.h)(0x64C20327)
 I (usr_src\init_periph.h)(0x64181687)
-I (usr_src\user_tasks.h)(0x64D5FE93)
+I (usr_src\user_tasks.h)(0x64D60392)
 I (usr_src\delay_us.h)(0x641AE1A4)
 F (.\usr_rtos\croutine.c)(0x5BB71CA8)(--c99 --gnu -c --cpu Cortex-M3 -D__EVAL -g -O0 --apcs=interwork --split_sections -I .\usr_libs\CMSIS -I .\usr_libs\Conf -I .\usr_libs\Drivers\inc -I .\usr_libs\Interrupt -I .\usr_libs\StartUp -I .\usr_rtos\include -I .\usr_src-IC:\Users\osotovsv\AppData\Local\Arm\Packs\Keil\STM32L1xx_DFP\1.3.0\Drivers\CMSIS\Device\ST\STM32L1xx\Include-D__UVISION_VERSION="535" -DSTM32L152xC -DSTM32L1XX_MD-o .\objects\croutine.o --omf_browse .\objects\croutine.crf --depend .\objects\croutine.d)
 I (.\usr_rtos\include\FreeRTOS.h)(0x5BB71CA8)
@@ -1474,5 +1474,5 @@ I (.\usr_rtos\include\message_buffer.h)(0x5BB71CA8)
 I (.\usr_rtos\include\stream_buffer.h)(0x5BB71CA8)
 I (.\usr_src\usart2_usr.h)(0x64D5DEF8)
 I (.\usr_src\init_periph.h)(0x64181687)
-I (.\usr_src\user_tasks.h)(0x64D5FE93)
+I (.\usr_src\user_tasks.h)(0x64D60392)
 I (.\usr_src\delay_us.h)(0x641AE1A4)

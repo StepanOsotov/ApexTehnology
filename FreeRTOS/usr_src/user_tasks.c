@@ -8,8 +8,8 @@
 usart_usr_t usart3_usr;
 usart_usr_t usart2_usr;
 
-SemaphoreHandle_t xBinSemaph3to2;
-SemaphoreHandle_t xBinSemaph2to3;
+SemaphoreHandle_t xBinSemaph3;
+SemaphoreHandle_t xBinSemaph2;
 
 void clearArray(uint8_t *arr, uint16_t len);
 
@@ -51,7 +51,7 @@ void vTaskUsart2Tranceiver(void *pvParameters)
 		
 		//==========================-HANDLER-SEMAPHORE-FROM-3=============================
 		
-		xSemaphoreTake(xBinSemaph3to2, WAIT_SEMAPHORE);
+		xSemaphoreTake(xBinSemaph3, WAIT_SEMAPHORE);
 		if(usart3_usr.isRxOverflow)
 		{
 			usart3_usr.length = snprintf((char *)usart3_usr.bufTx, BUFFER_USART_MAX,
@@ -88,7 +88,7 @@ void vTaskUsart2Tranceiver(void *pvParameters)
 		{
 			if(usart2_usr.isRxOverflow)
 			{
-				xSemaphoreGive(xBinSemaph2to3);
+				xSemaphoreGive(xBinSemaph2);
 			}
 			else
 			{
@@ -100,7 +100,7 @@ void vTaskUsart2Tranceiver(void *pvParameters)
 						{
 							usart2_usr.completeMessage = 1;
 							
-							xSemaphoreGive(xBinSemaph2to3);
+							xSemaphoreGive(xBinSemaph2);
 							
 							GPIOB->ODR ^= (1 << 7);
 								
@@ -178,7 +178,7 @@ void vTaskUsart3Tranceiver(void *pvParameters)
 		{
 			if(usart3_usr.isRxOverflow)
 			{
-				xSemaphoreGive(xBinSemaph3to2);
+				xSemaphoreGive(xBinSemaph3);
 			}
 			else
 			{
@@ -190,7 +190,7 @@ void vTaskUsart3Tranceiver(void *pvParameters)
 						{
 							usart3_usr.completeMessage = 1;
 							
-							xSemaphoreGive(xBinSemaph3to2);
+							xSemaphoreGive(xBinSemaph3);
 							
 							GPIOB->ODR ^= (1 << 7);
 								
@@ -202,10 +202,9 @@ void vTaskUsart3Tranceiver(void *pvParameters)
 			}
 		}
 		
-		
 		//==========================-HANDLER-SEMAPHORE-FROM-3=============================
 		
-		xSemaphoreTake(xBinSemaph2to3, WAIT_SEMAPHORE);
+		xSemaphoreTake(xBinSemaph2, WAIT_SEMAPHORE);
 		
 		if(usart2_usr.isRxOverflow)
 		{
