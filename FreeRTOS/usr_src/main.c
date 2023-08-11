@@ -39,11 +39,10 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
-const char *usart3Str = "123456789 Tx Check\n\r";
-const char *start2RTOS = "vTaskStartScheduler\n\r";
-const char *usart2DMA = "Enable DMA, rx (default = 5 byte)\n\r";
-const char *usart2IRQ = "Enable IRQ, rx end Message = 0x0A 0x0D\n\r";
-const char *usart2POOL = "Enable Polling, rx end Message = 0x0A 0x0D\n\r";
+const char *startRTOS = "vTaskStartScheduler\n\r";
+const char *usartDMA = "Enable DMA, rx (default = 5 byte)\n\r";
+const char *usartIRQ = "Enable IRQ, rx end Message = 0x0A 0x0D\n\r";
+const char *usartPOOL = "Enable Polling, rx end Message = 0x0A 0x0D\n\r";
 
 const char *usart2ErrorConfig = "Error Config DMA and IRQ (tx, Rx)\n\r";
 
@@ -77,8 +76,11 @@ int main(void)
 	
 	initClock();
 	
-	usart3to2_usr.isIrqOnRx = 1;
-	usart3to2_usr.isIrqOnTx = 1;
+	usart3_usr.isIrqOnRx = 1;
+	usart3_usr.isIrqOnTx = 1;
+	
+	usart2_usr.isIrqOnRx = 1;
+	usart2_usr.isIrqOnTx = 1;
 	
 	USART3_Settings();
 	USART2_Settings();
@@ -89,17 +91,8 @@ int main(void)
 	
 	//----------------------------------------
 	
-	/*
-	usart3_usr.length = strlen(usart3Str);
-	static paramUsart_t paramUsart3;
-	paramUsart3.txString = usart3Str;
-	paramUsart3.length = usart3_usr.length;
-	
-	xTaskCreate(vTaskUsart3Transmit, (const char *)"TxUsart3",
-							configMINIMAL_STACK_SIZE, (void*)&paramUsart3,
-							tskIDLE_PRIORITY + 1, NULL);
-	*/
-	vSemaphoreCreateBinary(xBinarySemaphore);
+	vSemaphoreCreateBinary(xBinSemaph3to2);
+	vSemaphoreCreateBinary(xBinSemaph2to3);
 	
 	xTaskCreate(vTaskLedToggle, (const char *)"ToggleLeds",
 							configMINIMAL_STACK_SIZE, NULL,
@@ -152,36 +145,70 @@ void assert_failed(uint8_t* file, uint32_t line)
 void USART_Config(void)
 {
 	
-	if(!usart3to2_usr.isErrConf)
+	if(!usart3_usr.isErrConf)
 	{
-		usart3to2_usr.length = strlen(start2RTOS);
+		usart3_usr.length = strlen(startRTOS);
 		
-		USART2_SendText((const uint8_t *)start2RTOS, usart3to2_usr.length, TX_WAIT_END);		
+		USART2_SendText((const uint8_t *)startRTOS, usart3_usr.length, TX_WAIT_END);		
 		
-		if(usart3to2_usr.isDmaOnRx)
+		if(usart3_usr.isDmaOnRx)
 		{
-			usart3to2_usr.length = strlen(usart2DMA);
+			usart3_usr.length = strlen(usartDMA);
 		
-			USART2_SendText((const uint8_t *)usart2DMA, usart3to2_usr.length, TX_WAIT_END);
+			USART2_SendText((const uint8_t *)usartDMA, usart3_usr.length, TX_WAIT_END);
 		}
-		else if(usart3to2_usr.isIrqOnRx)
+		else if(usart3_usr.isIrqOnRx)
 		{
-			usart3to2_usr.length = strlen(usart2IRQ);
+			usart3_usr.length = strlen(usartIRQ);
 		
-			USART2_SendText((const uint8_t *)usart2IRQ, usart3to2_usr.length, TX_WAIT_END);
+			USART2_SendText((const uint8_t *)usartIRQ, usart3_usr.length, TX_WAIT_END);
 		}
 		else
 		{
-			usart3to2_usr.length = strlen(usart2POOL);
+			usart3_usr.length = strlen(usartPOOL);
 		
-			USART2_SendText((const uint8_t *)usart2POOL, usart3to2_usr.length, TX_WAIT_END);
+			USART2_SendText((const uint8_t *)usartPOOL, usart3_usr.length, TX_WAIT_END);
 		}
 	}
 	else
 	{
-		usart3to2_usr.length = strlen(usart2ErrorConfig);
+		usart3_usr.length = strlen(usart2ErrorConfig);
 		
-		USART2_SendText((const uint8_t *)usart2ErrorConfig, usart3to2_usr.length, TX_WAIT_END);
+		USART2_SendText((const uint8_t *)usart2ErrorConfig, usart3_usr.length, TX_WAIT_END);
+	}
+	
+	
+	
+	if(!usart2_usr.isErrConf)
+	{
+		usart2_usr.length = strlen(startRTOS);
+		
+		USART3_SendText((const uint8_t *)startRTOS, usart2_usr.length, TX_WAIT_END);		
+		
+		if(usart2_usr.isDmaOnRx)
+		{
+			usart2_usr.length = strlen(usartDMA);
+		
+			USART3_SendText((const uint8_t *)usartDMA, usart2_usr.length, TX_WAIT_END);
+		}
+		else if(usart2_usr.isIrqOnRx)
+		{
+			usart2_usr.length = strlen(usartIRQ);
+		
+			USART3_SendText((const uint8_t *)usartIRQ, usart2_usr.length, TX_WAIT_END);
+		}
+		else
+		{
+			usart2_usr.length = strlen(usartPOOL);
+		
+			USART3_SendText((const uint8_t *)usartPOOL, usart2_usr.length, TX_WAIT_END);
+		}
+	}
+	else
+	{
+		usart2_usr.length = strlen(usart2ErrorConfig);
+		
+		USART3_SendText((const uint8_t *)usart2ErrorConfig, usart2_usr.length, TX_WAIT_END);
 	}
 }
 /**

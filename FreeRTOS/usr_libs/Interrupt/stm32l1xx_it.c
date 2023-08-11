@@ -173,7 +173,7 @@ void DMA1_Channel7_IRQHandler(void)
 
 		DMA1_Channel7->CCR &= ~DMA_CCR2_EN;
 		
-		usart3to2_usr.dma_wait_tx = 1;
+		usart2_usr.dma_wait_tx = 1;
 	}
 }
 
@@ -190,7 +190,7 @@ void DMA1_Channel6_IRQHandler(void)
 
 		DMA1_Channel6->CCR &= ~DMA_CCR3_EN;
 		
-		usart3to2_usr.dma_wait_rx = 1;
+		usart2_usr.dma_wait_rx = 1;
 	}
 }
 
@@ -206,19 +206,19 @@ void USART2_IRQHandler(void)
 		//This bit is set by hardware when the content of the TDR register
 		//has been transferred into the shift register.
 		
-		if(usart3to2_usr.cntTx && usart3to2_usr.lengthTx)
+		if(usart2_usr.cntTx && usart2_usr.lengthTx)
 		{
-			if(usart3to2_usr.cntTx < usart3to2_usr.lengthTx)
+			if(usart2_usr.cntTx < usart2_usr.lengthTx)
 			{
-				USART2->DR = *(usart3to2_usr.bufTx + usart3to2_usr.cntTx);
+				USART2->DR = *(usart2_usr.bufTx + usart2_usr.cntTx);
 			}
-			usart3to2_usr.cntTx++;
+			usart2_usr.cntTx++;
 		}
 	}
 	if(status & USART_SR_TC)
 	{
-		usart3to2_usr.cntTx = 0;
-		usart3to2_usr.lengthTx = 0;
+		usart2_usr.cntTx = 0;
+		usart2_usr.lengthTx = 0;
 		//Bit 7 TXEIE: TXE interrupt enable
 		USART2->CR1 &= ~USART_CR1_TXEIE;
 		//Bit 6 TCIE: Transmission complete interrupt enable
@@ -226,23 +226,24 @@ void USART2_IRQHandler(void)
 	}
 	if(status & USART_SR_RXNE)
 	{
-		if(usart3to2_usr.isRxOverflow)
+		if(usart2_usr.isRxOverflow)
 		{
 			(void)USART2->DR;
 		}
 		else
 		{
-			if(usart3to2_usr.cntRx < BUFFER_USART_MAX)
+			if(usart2_usr.cntRx < BUFFER_USART_MAX)
 			{
-				usart3to2_usr.bufRx[usart3to2_usr.cntRx++] = USART3->DR;
+				usart2_usr.bufRx[usart2_usr.cntRx++] = USART2->DR;
 			}
 			else
 			{
 				(void)USART2->DR;
-				usart3to2_usr.isRxOverflow = 1;
-				usart3to2_usr.cntRx = 0;
+				usart2_usr.isRxOverflow = 1;
+				usart2_usr.cntRx = 0;
 			}
 		}
+		//USART2->SR &= ~USART_SR_RXNE;
 	}
 }
 
@@ -260,7 +261,7 @@ void DMA1_Channel2_IRQHandler(void)
 
 		DMA1_Channel2->CCR &= ~DMA_CCR2_EN;
 		
-		usart3to2_usr.dma_wait_tx = 1;
+		usart3_usr.dma_wait_tx = 1;
 	}
 }
 
@@ -277,7 +278,7 @@ void DMA1_Channel3_IRQHandler(void)
 
 		DMA1_Channel3->CCR &= ~DMA_CCR3_EN;
 		
-		usart3to2_usr.dma_wait_rx = 1;
+		usart3_usr.dma_wait_rx = 1;
 	}
 }
 
@@ -293,19 +294,19 @@ void USART3_IRQHandler(void)
 		//This bit is set by hardware when the content of the TDR register
 		//has been transferred into the shift register.
 		
-		if(usart3to2_usr.cntTx && usart3to2_usr.lengthTx)
+		if(usart3_usr.cntTx && usart3_usr.lengthTx)
 		{
-			if(usart3to2_usr.cntTx < usart3to2_usr.lengthTx)
+			if(usart3_usr.cntTx < usart3_usr.lengthTx)
 			{
-				USART3->DR = *(usart3to2_usr.bufTx + usart3to2_usr.cntTx);
+				USART3->DR = *(usart3_usr.bufTx + usart3_usr.cntTx);
 			}
-			usart3to2_usr.cntTx++;
+			usart3_usr.cntTx++;
 		}
 	}
 	if(status & USART_SR_TC)
 	{
-		usart3to2_usr.cntTx = 0;
-		usart3to2_usr.lengthTx = 0;
+		usart3_usr.cntTx = 0;
+		usart3_usr.lengthTx = 0;
 		//Bit 7 TXEIE: TXE interrupt enable
 		USART3->CR1 &= ~USART_CR1_TXEIE;
 		//Bit 6 TCIE: Transmission complete interrupt enable
@@ -313,23 +314,24 @@ void USART3_IRQHandler(void)
 	}
 	if(status & USART_SR_RXNE)
 	{
-		if(usart3to2_usr.isRxOverflow)
+		if(usart3_usr.isRxOverflow)
 		{
 			(void)USART3->DR;
 		}
 		else
 		{
-			if(usart3to2_usr.cntRx < BUFFER_USART_MAX)
+			if(usart3_usr.cntRx < BUFFER_USART_MAX)
 			{
-				usart3to2_usr.bufRx[usart3to2_usr.cntRx++] = USART3->DR;
+				usart3_usr.bufRx[usart3_usr.cntRx++] = USART3->DR;
 			}
 			else
 			{
 				(void)USART3->DR;
-				usart3to2_usr.isRxOverflow = 1;
-				usart3to2_usr.cntRx = 0;
+				usart3_usr.isRxOverflow = 1;
+				usart3_usr.cntRx = 0;
 			}
 		}
+		//USART3->SR &= ~USART_SR_RXNE;
 	}
 }
 

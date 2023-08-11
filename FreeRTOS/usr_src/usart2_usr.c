@@ -63,20 +63,20 @@ void USART2_Settings(void)
 	//4.	Select DMA enable (DMAT) in USART_CR3 if Multi buffer Communication is to take place. 
 	//		Configure the DMA register as explained in multibuffer communication.
 	//
-	if((!usart3to2_usr.isDmaOnTx) && (!usart3to2_usr.isDmaOnRx))
+	if((!usart2_usr.isDmaOnTx) && (!usart2_usr.isDmaOnRx))
 	{
 		USART2->CR3 &= ~USART_CR3_DMAT;
 		USART2->CR3 &= ~USART_CR3_DMAR;
 	}
 	else
 	{
-		if(1 == usart3to2_usr.isDmaOnTx)
+		if(1 == usart2_usr.isDmaOnTx)
 		{
 			//Bit 7 DMAT: DMA enable transmitter
 			USART2->CR3 |= USART_CR3_DMAT;
 			DMA1_Usart2_InitTX();
 		}
-		if(1 == usart3to2_usr.isDmaOnRx)
+		if(1 == usart2_usr.isDmaOnRx)
 		{
 			//Bit 6 DMAR: DMA enable receiver
 			USART2->CR3 |= USART_CR3_DMAR;
@@ -106,28 +106,28 @@ void USART2_Settings(void)
 	//begins searching for a start bit.
 	USART2->CR1 |= USART_CR1_RE;
 	//
-	if(usart3to2_usr.isIrqOnRx)
+	if(usart2_usr.isIrqOnRx)
 	{
 		//Bit 5 RXNEIE: RXNE interrupt enable
 		USART2->CR1 |= USART_CR1_RXNEIE;
 	}
-	if(usart3to2_usr.isIrqOnTx)
+	if(usart2_usr.isIrqOnTx)
 	{
 		//Bit 7 TXEIE: TXE interrupt enable
 		USART2->CR1 |= USART_CR1_TXEIE;
 		//Bit 6 TCIE: Transmission complete interrupt enable
 		USART2->CR1 |= USART_CR1_TCIE;
 	}
-	if(usart3to2_usr.isIrqOnRx || usart3to2_usr.isIrqOnTx)
+	if(usart2_usr.isIrqOnRx || usart2_usr.isIrqOnTx)
 	{
 		NVIC_EnableIRQ(USART2_IRQn);
 	}
 	
 //-----------------------------------------------------------------------------
 	
-	if(usart3to2_usr.isDmaOnRx)
+	if(usart2_usr.isDmaOnRx)
 	{
-		rx_USART2_with_DMA((uint8_t *)usart3to2_usr.bufRx, DMA_USART_RX_COUNT);
+		rx_USART2_with_DMA((uint8_t *)usart2_usr.bufRx, DMA_USART_RX_COUNT);
 	}
 }
 
@@ -156,16 +156,16 @@ The TXE bit is set by hardware and it indicates:
 
 void USART2_SendText(const uint8_t *data, uint16_t size, uint8_t isWait)
 {
-	if(usart3to2_usr.isDmaOnTx)
+	if(usart2_usr.isDmaOnTx)
 	{
-		usart3to2_usr.dma_wait_tx = 0;
+		usart2_usr.dma_wait_tx = 0;
 		tx_USART2_with_DMA(data, size);
 		if(isWait)
 		{
-			while(!usart3to2_usr.dma_wait_tx);
+			while(!usart2_usr.dma_wait_tx);
 		}
 	}
-	else if(usart3to2_usr.isIrqOnTx)
+	else if(usart2_usr.isIrqOnTx)
 	{
 		tx_USART2_with_IRQ(data, size);
 		if(isWait)
@@ -192,18 +192,18 @@ void tx_USART2_with_IRQ(const uint8_t *buffer, uint32_t len)
 	// copies data
 	for(uint32_t i = 0; i < len; ++i)
 	{
-		*(usart3to2_usr.bufTx + i) = *(buffer + i);
+		*(usart2_usr.bufTx + i) = *(buffer + i);
 	}
-	usart3to2_usr.cntTx = 1;
-	usart3to2_usr.lengthTx = len;
+	usart2_usr.cntTx = 1;
+	usart2_usr.lengthTx = len;
 	//tx one byte
 	
 	//Bit 7 TXE: Transmit data register empty
 	//while(!(USART2->SR & USART_SR_TXE));
 	
-	USART2->DR = *(usart3to2_usr.bufTx + 0);
+	USART2->DR = *(usart2_usr.bufTx + 0);
 	
-	if(usart3to2_usr.isIrqOnTx)
+	if(usart2_usr.isIrqOnTx)
 	{
 		//Bit 7 TXEIE: TXE interrupt enable
 		USART2->CR1 |= USART_CR1_TXEIE;
@@ -291,19 +291,19 @@ enum status_serial_t USART2_ReceiveTextWith0x0A0x0D(void)
 {
 	enum status_serial_t ret = NO_WORK;
 	
-	ret = USART2_Rx_Byte(&usart3to2_usr.bufRx[usart3to2_usr.cntRx]);
+	ret = USART2_Rx_Byte(&usart2_usr.bufRx[usart2_usr.cntRx]);
 	//
 	if(SUCCESS_BYTE == ret)
 	{
-		if(usart3to2_usr.cntRx < BUFFER_USART_MAX)
+		if(usart2_usr.cntRx < BUFFER_USART_MAX)
 		{
-			if((0x0D == usart3to2_usr.bufRx[usart3to2_usr.cntRx]) && (0x0A == usart3to2_usr.bufRx[usart3to2_usr.cntRx-1]))
+			if((0x0D == usart2_usr.bufRx[usart2_usr.cntRx]) && (0x0A == usart2_usr.bufRx[usart2_usr.cntRx-1]))
 			{
 				ret = SUCCESS_MESSAGE;
 			}
 			else
 			{
-				usart3to2_usr.cntRx++;
+				usart2_usr.cntRx++;
 			}
 		}
 		else

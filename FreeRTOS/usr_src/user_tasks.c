@@ -5,9 +5,15 @@
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-usart_usr_t usart3to2_usr;
+usart_usr_t usart3_usr;
+usart_usr_t usart2_usr;
 
-SemaphoreHandle_t xBinarySemaphore;
+SemaphoreHandle_t xBinSemaph3to2;
+SemaphoreHandle_t xBinSemaph2to3;
+
+void clearArray(uint8_t *arr, uint16_t len);
+
+#define WAIT_SEMAPHORE	100
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -29,83 +35,103 @@ void vTaskLedToggle(void *pvParameters)
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-void vTaskUsart2Transmit(void *pvParameters)
-{
-	paramUsart_t *paramUsart2 = (paramUsart_t *)pvParameters;
-	
-	while(pdTRUE)
-	{
-		vTaskDelay(1000);
-		
-		USART2_SendText((const uint8_t *)paramUsart2->txString, paramUsart2->length, TX_NO_WAIT);
-		
-		//============================================================
-	}
-}
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
 void vTaskUsart2Tranceiver(void *pvParameters)
 {
 	
+	usart2_usr.status = NO_WORK;
+	usart2_usr.length = 0;
+	usart2_usr.rxCheck = 0;
+	usart2_usr.completeMessage = 0;
+	
+	usart2_usr.cntRx = 0;
+	usart2_usr.isRxOverflow = 0;
+	
 	while(pdTRUE)
 	{
-		xSemaphoreTake(xBinarySemaphore, portMAX_DELAY);
 		
-		//==========================-RX-In-IRQ-=============================
-		if(usart3to2_usr.isRxOverflow)
+		//==========================-HANDLER-SEMAPHORE-FROM-3=============================
+		
+		xSemaphoreTake(xBinSemaph3to2, WAIT_SEMAPHORE);
+		if(usart3_usr.isRxOverflow)
 		{
-			usart3to2_usr.length = snprintf((char *)usart3to2_usr.bufTx, BUFFER_USART_MAX,
-								"overflow %d\n\r", usart3to2_usr.isRxOverflow);
+			usart3_usr.length = snprintf((char *)usart3_usr.bufTx, BUFFER_USART_MAX,
+								"overflow %d\n\r", usart3_usr.isRxOverflow);
 			
-			usart3to2_usr.isRxOverflow = 0;
+			usart3_usr.isRxOverflow = 0;
 			
-			USART2_SendText((const uint8_t *)usart3to2_usr.bufTx, usart3to2_usr.length, TX_NO_WAIT);
+			USART2_SendText((const uint8_t *)usart3_usr.bufTx, usart3_usr.length, TX_NO_WAIT);
 			
-			clearArray(usart3to2_usr.bufTx, BUFFER_USART_MAX);
-			clearArray(usart3to2_usr.bufRx, BUFFER_USART_MAX);
+			clearArray(usart3_usr.bufTx, BUFFER_USART_MAX);
+			clearArray(usart3_usr.bufRx, BUFFER_USART_MAX);
 			
 		}
 		
-		if(usart3to2_usr.completeMessage)
+		if(usart3_usr.completeMessage)
 		{
-			clearArray(usart3to2_usr.bufTx, BUFFER_USART_MAX);
+			clearArray(usart3_usr.bufTx, BUFFER_USART_MAX);
 			
-			usart3to2_usr.length = snprintf((char *)usart3to2_usr.bufTx, BUFFER_USART_MAX,
-										"rx msg %s", usart3to2_usr.bufRx);																							//snprintf No Thread Safety
-			USART2_SendText((const uint8_t *)usart3to2_usr.bufTx, usart3to2_usr.length, TX_NO_WAIT);
+			usart3_usr.length = snprintf((char *)usart3_usr.bufTx, BUFFER_USART_MAX,
+										"rx msg %s", usart3_usr.bufRx);																							//snprintf No Thread Safety
+			USART2_SendText((const uint8_t *)usart3_usr.bufTx, usart3_usr.length, TX_NO_WAIT);
 
-			usart3to2_usr.rxCheck = usart3to2_usr.cntRx = 0;
+			usart3_usr.rxCheck = usart3_usr.cntRx = 0;
 			
-			clearArray(usart3to2_usr.bufRx, BUFFER_USART_MAX);
+			clearArray(usart3_usr.bufRx, BUFFER_USART_MAX);
 			
-			usart3to2_usr.completeMessage = 0;
+			usart3_usr.completeMessage = 0;
 			
 			GPIOB->ODR ^= (1 << 7);
+		}
+		
+		//==========================-RX-In-IRQ-FOR-USART-2=============================
+		if(usart2_usr.isIrqOnRx)
+		{
+			if(usart2_usr.isRxOverflow)
+			{
+				xSemaphoreGive(xBinSemaph2to3);
+			}
+			else
+			{
+				if(usart2_usr.rxCheck != usart2_usr.cntRx)
+				{
+					for(uint16_t i = 0; i < usart2_usr.cntRx ; i++)
+					{
+						if((usart2_usr.bufRx[i] == 0x0A) && (usart2_usr.bufRx[i+1] == 0x0D))
+						{
+							usart2_usr.completeMessage = 1;
+							
+							xSemaphoreGive(xBinSemaph2to3);
+							
+							GPIOB->ODR ^= (1 << 7);
+								
+							break;
+						}
+					}
+					usart2_usr.rxCheck = usart2_usr.cntRx;
+				}
+			}
 		}
 		
 		vTaskDelay(10);
 		
 		/*
 		//==========================-RX-In-DMA-=============================
-		if(usart3to2_usr.isDmaOnRx)
+		if(usart3_usr.isDmaOnRx)
 		{
-			if(usart3to2_usr.dma_wait_rx)
+			if(usart3_usr.dma_wait_rx)
 			{
-				usart3to2_usr.dma_wait_rx = 0;
+				usart3_usr.dma_wait_rx = 0;
 				
-				usart3to2_usr.length = snprintf((char *)usart3to2_usr.bufTx, BUFFER_USART_MAX,
-												"rx msg : %s \n\r", usart3to2_usr.bufRx);																							//snprintf No Thread Safety
-				USART2_SendText((const uint8_t *)usart3to2_usr.bufTx, usart3to2_usr.length, TX_WAIT_END);
+				usart3_usr.length = snprintf((char *)usart3_usr.bufTx, BUFFER_USART_MAX,
+												"rx msg : %s \n\r", usart3_usr.bufRx);																							//snprintf No Thread Safety
+				USART2_SendText((const uint8_t *)usart3_usr.bufTx, usart3_usr.length, TX_WAIT_END);
 				
 				GPIOB->ODR ^= (1 << 7);
 				
-				clearArray(usart3to2_usr.bufTx, BUFFER_USART_MAX);
-				clearArray(usart3to2_usr.bufRx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufTx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufRx, BUFFER_USART_MAX);
 				
-				rx_USART2_with_DMA((uint8_t *)usart3to2_usr.bufRx, DMA_USART_RX_COUNT);
+				rx_USART2_with_DMA((uint8_t *)usart3_usr.bufRx, DMA_USART_RX_COUNT);
 				
 			}
 			vTaskDelay(10);
@@ -114,16 +140,16 @@ void vTaskUsart2Tranceiver(void *pvParameters)
 		//==========================-RX-In-Thread-==========================
 		else //if((!usart3_usr.isDmaOnRx) && (!usart3_usr.isIrqOnRx))
 		{
-			usart3to2_usr.status = USART2_ReceiveTextWith0x0A0x0D();
+			usart3_usr.status = USART2_ReceiveTextWith0x0A0x0D();
 			
-			if(SUCCESS_MESSAGE == usart3to2_usr.status)
+			if(SUCCESS_MESSAGE == usart3_usr.status)
 			{
 				GPIOB->ODR ^= (1 << 7);
 				
-				clearArray(usart3to2_usr.bufTx, BUFFER_USART_MAX);
-				clearArray(usart3to2_usr.bufRx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufTx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufRx, BUFFER_USART_MAX);
 				
-				usart3to2_usr.cntRx = 0;
+				usart3_usr.cntRx = 0;
 			}
 			vTaskDelay(10);
 		}
@@ -135,103 +161,121 @@ void vTaskUsart2Tranceiver(void *pvParameters)
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-void vTaskUsart3Transmit(void *pvParameters)
-{
-	paramUsart_t *paramUsart = (paramUsart_t *)pvParameters;
-	
-	while(pdTRUE)
-	{
-		vTaskDelay(1000);
-		
-		USART3_SendText((const uint8_t *)paramUsart->txString, paramUsart->length, TX_NO_WAIT);
-		
-		//============================================================
-	}
-}
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
 void vTaskUsart3Tranceiver(void *pvParameters)
 {
-	usart3to2_usr.status = NO_WORK;
-	usart3to2_usr.length = 0;
-	usart3to2_usr.rxCheck = 0;
-	usart3to2_usr.completeMessage = 0;
+	usart3_usr.status = NO_WORK;
+	usart3_usr.length = 0;
+	usart3_usr.rxCheck = 0;
+	usart3_usr.completeMessage = 0;
 	
-	usart3to2_usr.cntRx = 0;
-	usart3to2_usr.isRxOverflow = 0;
+	usart3_usr.cntRx = 0;
+	usart3_usr.isRxOverflow = 0;
 	
 	while(pdTRUE)
 	{
-		//==========================-RX-In-IRQ-=============================
-		if(usart3to2_usr.isIrqOnRx)
+		//==========================-RX-In-IRQ-FOR-USART-3=============================
+		if(usart3_usr.isIrqOnRx)
 		{
-			if(usart3to2_usr.isRxOverflow)
+			if(usart3_usr.isRxOverflow)
 			{
-				xSemaphoreGive(xBinarySemaphore);
+				xSemaphoreGive(xBinSemaph3to2);
 			}
 			else
 			{
-				if(usart3to2_usr.rxCheck != usart3to2_usr.cntRx)
+				if(usart3_usr.rxCheck != usart3_usr.cntRx)
 				{
-					for(uint16_t i = 0; i < usart3to2_usr.cntRx ; i++)
+					for(uint16_t i = 0; i < usart3_usr.cntRx ; i++)
 					{
-						if((usart3to2_usr.bufRx[i] == 0x0A) && (usart3to2_usr.bufRx[i+1] == 0x0D))
+						if((usart3_usr.bufRx[i] == 0x0A) && (usart3_usr.bufRx[i+1] == 0x0D))
 						{
-							usart3to2_usr.completeMessage = 1;
+							usart3_usr.completeMessage = 1;
 							
-							xSemaphoreGive(xBinarySemaphore);
+							xSemaphoreGive(xBinSemaph3to2);
 							
 							GPIOB->ODR ^= (1 << 7);
 								
 							break;
 						}
 					}
-					usart3to2_usr.rxCheck = usart3to2_usr.cntRx;
+					usart3_usr.rxCheck = usart3_usr.cntRx;
 				}
 			}
+		}
+		
+		
+		//==========================-HANDLER-SEMAPHORE-FROM-3=============================
+		
+		xSemaphoreTake(xBinSemaph2to3, WAIT_SEMAPHORE);
+		
+		if(usart2_usr.isRxOverflow)
+		{
+			usart2_usr.length = snprintf((char *)usart2_usr.bufTx, BUFFER_USART_MAX,
+								"overflow %d\n\r", usart2_usr.isRxOverflow);
+			
+			usart2_usr.isRxOverflow = 0;
+			
+			USART3_SendText((const uint8_t *)usart2_usr.bufTx, usart2_usr.length, TX_NO_WAIT);
+			
+			clearArray(usart2_usr.bufTx, BUFFER_USART_MAX);
+			clearArray(usart2_usr.bufRx, BUFFER_USART_MAX);
+			
+		}
+		
+		if(usart2_usr.completeMessage)
+		{
+			clearArray(usart2_usr.bufTx, BUFFER_USART_MAX);
+			
+			usart2_usr.length = snprintf((char *)usart2_usr.bufTx, BUFFER_USART_MAX,
+										"rx msg %s", usart2_usr.bufRx);																							//snprintf No Thread Safety
+			USART3_SendText((const uint8_t *)usart2_usr.bufTx, usart2_usr.length, TX_NO_WAIT);
+
+			usart2_usr.rxCheck = usart2_usr.cntRx = 0;
+			
+			clearArray(usart2_usr.bufRx, BUFFER_USART_MAX);
+			
+			usart2_usr.completeMessage = 0;
+			
+			GPIOB->ODR ^= (1 << 7);
 		}
 		
 		vTaskDelay(10);
 		
 		/*
 		//==========================-RX-In-DMA-=============================
-		if(usart3to2_usr.isDmaOnRx)
+		if(usart3_usr.isDmaOnRx)
 		{
-			if(usart3to2_usr.dma_wait_rx)
+			if(usart3_usr.dma_wait_rx)
 			{
-				usart3to2_usr.dma_wait_rx = 0;
+				usart3_usr.dma_wait_rx = 0;
 				
-				usart3to2_usr.length = snprintf((char *)usart3to2_usr.bufTx, BUFFER_USART_MAX,
-											"rx msg %s \n\r", usart3to2_usr.bufRx);																							//snprintf No Thread Safety
-				USART3_SendText((const uint8_t *)usart3to2_usr.bufTx, usart3to2_usr.length, TX_WAIT_END);
+				usart3_usr.length = snprintf((char *)usart3_usr.bufTx, BUFFER_USART_MAX,
+											"rx msg %s \n\r", usart3_usr.bufRx);																							//snprintf No Thread Safety
+				USART3_SendText((const uint8_t *)usart3_usr.bufTx, usart3_usr.length, TX_WAIT_END);
 				
 				GPIOB->ODR ^= (1 << 7);
 				
-				clearArray(usart3to2_usr.bufTx, BUFFER_USART_MAX);
-				clearArray(usart3to2_usr.bufRx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufTx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufRx, BUFFER_USART_MAX);
 				
-				rx_USART3_with_DMA((uint8_t *)usart3to2_usr.bufRx, DMA_USART_RX_COUNT);
+				rx_USART3_with_DMA((uint8_t *)usart3_usr.bufRx, DMA_USART_RX_COUNT);
 				
 			}
 			vTaskDelay(10);
 		}
 		
 		//==========================-RX-In-Thread-==========================
-		else //if((!usart3to2_usr.isDmaOnRx) && (!usart3to2_usr.isIrqOnRx))
+		else //if((!usart3_usr.isDmaOnRx) && (!usart3_usr.isIrqOnRx))
 		{
-			usart3to2_usr.status = USART3_ReceiveTextWith0x0A0x0D();
+			usart3_usr.status = USART3_ReceiveTextWith0x0A0x0D();
 			
-			if(SUCCESS_MESSAGE == usart3to2_usr.status)
+			if(SUCCESS_MESSAGE == usart3_usr.status)
 			{
 				GPIOB->ODR ^= (1 << 7);
 				
-				clearArray(usart3to2_usr.bufTx, BUFFER_USART_MAX);
-				clearArray(usart3to2_usr.bufRx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufTx, BUFFER_USART_MAX);
+				clearArray(usart3_usr.bufRx, BUFFER_USART_MAX);
 				
-				usart3to2_usr.cntRx = 0;
+				usart3_usr.cntRx = 0;
 			}
 			vTaskDelay(10);
 		}

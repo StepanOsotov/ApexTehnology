@@ -48,19 +48,18 @@ typedef struct
 	
 } usart_usr_t;
 
-extern usart_usr_t usart3to2_usr;
+extern usart_usr_t usart3_usr;
+extern usart_usr_t usart2_usr;
 
-extern SemaphoreHandle_t xBinarySemaphore;
+extern SemaphoreHandle_t xBinSemaph3to2;
+extern SemaphoreHandle_t xBinSemaph2to3;
 
 //--------------------------------------------------------------------------------
 
 void vTaskLedToggle(void *pvParameters);
-void vTaskUsart3Transmit(void *pvParameters);
 
 void vTaskUsart2Tranceiver(void *pvParameters);
 void vTaskUsart3Tranceiver(void *pvParameters);
-
-void clearArray(uint8_t *arr, uint16_t len);
 
 //--------------------------------------------------------------------------------
 
